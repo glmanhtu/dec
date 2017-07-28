@@ -111,11 +111,25 @@ def dispImg(X, n, fname=None):
   h = X.shape[1]
   w = X.shape[2]
   c = X.shape[3]
-  buff = np.zeros((n*w, n*w, c), dtype=np.uint8)
+  buff = np.zeros((n*h, n*w, c), dtype=np.uint8)
 
   for i in xrange(n):
     for j in xrange(n):
       buff[i*h:(i+1)*h, j*w:(j+1)*w, :] = X[i*n+j]
+
+  if fname is None:
+    cv2.imshow('a', buff)
+    cv2.waitKey(0)
+  else:
+    cv2.imwrite(fname, buff)
+
+def dispSingleImg(X, n, fname=None):
+  h = X.shape[1]
+  w = X.shape[2]
+  c = X.shape[3]
+  buff = np.zeros((h, w, c), dtype=np.uint8)
+
+  buff[0:h, 0:w, :] = X[n]
 
   if fname is None:
     cv2.imshow('a', buff)
@@ -488,7 +502,7 @@ def load_stl(fname):
   H = np.asarray(Parallel(n_jobs=n_jobs)( delayed(features.hog)(X[i]) for i in xrange(N) ))
 
   H_img = np.repeat(np.asarray([ hog_picture(H[i], 9) for i in xrange(100) ])[:, :,:,np.newaxis], 3, 3)
-  dispImg(H_img, 10, fname+'_hog.jpg') 
+  dispImg(H_img, 10, fname+'_hog.jpg')
   H = H.reshape((H.shape[0], H.size/N))
 
   X_small = np.asarray(Parallel(n_jobs=n_jobs)( delayed(cv2.resize)(X[i], cmap_size) for i in xrange(N) ))
@@ -614,6 +628,17 @@ def write_net(db, dim, n_class, seek):
   with open('net.prototxt', 'w') as fnet:
     make_net(fnet, layers)
 
+
+def classify_dataset(predicts, imgs, db):
+    classes_dir = "classes_" + db
+    if not os.path.isdir(classes_dir):
+        os.makedirs(classes_dir)
+    for idex, pred in enumerate(predicts):
+        tmp_dir = os.path.join(classes_dir, str(pred))
+        if not os.path.isdir(tmp_dir):
+            os.makedirs(tmp_dir)
+        dispSingleImg(imgs, idex, os.path.join(tmp_dir, str(idex) + ".jpg"))
+
 def DisKmeans(db, update_interval = None):
     from sklearn.cluster import KMeans
     from sklearn.mixture import GMM
@@ -704,6 +729,7 @@ def DisKmeans(db, update_interval = None):
       print 'acc: ', acc, 'nmi: ', nmi
       print (Y_pred != Y_pred_last).sum()*1.0/N
       if (Y_pred != Y_pred_last).sum() < 0.001*N:
+        classify_dataset(Y_pred, img, db)
         print acc_list
         return acc, nmi
       time.sleep(1)
