@@ -639,6 +639,22 @@ def classify_dataset(predicts, imgs, db):
             os.makedirs(tmp_dir)
         dispSingleImg(imgs, idex, os.path.join(tmp_dir, str(idex) + ".jpg"))
 
+
+def show_result(predicts, actuals):
+    summary = {}
+    for idx, value in enumerate(actuals):
+        actual = str(value)
+        predict = str(predicts[idx])
+        if actual in summary:
+            if predict in summary[actual]:
+                summary[actual][predict] += 1
+            else:
+                summary[actual][predict] = 1
+        else:
+            summary[actual] = {}
+    print summary
+
+
 def DisKmeans(db, update_interval = None):
     from sklearn.cluster import KMeans
     from sklearn.mixture import GMM
@@ -667,6 +683,15 @@ def DisKmeans(db, update_interval = None):
       X, Y = read_db(db+'_total', True)
       X = np.asarray(X, dtype=np.float64)
       Y = np.asarray(np.squeeze(Y), dtype = np.int32)
+      N = X.shape[0]
+    elif db == 'custom':
+      N_class = 4
+      train_batch_size = 256
+      img = read_db('custom_img', False)[0]
+      img = img.reshape((img.shape[0], 107, 65, 3))
+      X, Y = read_db(db + '_total', True)
+      X = np.asarray(X, dtype=np.float64)
+      Y = np.asarray(np.squeeze(Y), dtype=np.int32)
       N = X.shape[0]
     elif db == 'reuters':
       N_class = 4
@@ -730,6 +755,7 @@ def DisKmeans(db, update_interval = None):
       print (Y_pred != Y_pred_last).sum()*1.0/N
       if (Y_pred != Y_pred_last).sum() < 0.001*N:
         classify_dataset(Y_pred, img, db)
+        show_result(Y_pred, Y)
         print acc_list
         return acc, nmi
       time.sleep(1)
