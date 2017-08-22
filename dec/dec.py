@@ -688,7 +688,7 @@ def DisKmeans(db, update_interval = None):
       N_class = 4
       train_batch_size = 256
       img = read_db('custom_img', False)[0]
-      img = img.reshape((img.shape[0], 107, 65, 3))
+      img = img.reshape((img.shape[0], 120, 200, 3))
       X, Y = read_db(db + '_total', True)
       X = np.asarray(X, dtype=np.float64)
       Y = np.asarray(np.squeeze(Y), dtype=np.int32)

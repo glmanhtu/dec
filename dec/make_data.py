@@ -27,9 +27,9 @@ def dispImg(X, n, fname=None):
 def load_data(images_dir):
     ims = [read(os.path.join(images_dir, filename)) for filename in os.listdir(images_dir)]
     X = np.array(ims, dtype='uint8')
-    dispImg(X[:100, :, :, [2, 1, 0]], 10)
+   # dispImg(X[:100, :, :, [2, 1, 0]], 10)
     n_jobs = 10
-    cmap_size = (8, 8)
+    cmap_size = (6, 10)
     N = X.shape[0]
 
     H = np.asarray(Parallel(n_jobs=n_jobs)(delayed(features.hog)(X[i]) for i in xrange(N)))
@@ -46,19 +46,32 @@ def load_data(images_dir):
 
     return feature, X[:, :, :, [2, 1, 0]]
 
+
+def load_label(images_dir, classes, determine):
+    return np.array([classes.index(filename.split(determine)[0]) for filename in os.listdir(images_dir)], dtype='uint8')
+
+
+def load_named_label(images_dir):
+    return np.array([filename for filename in os.listdir(images_dir)], dtype='str')
+
 if __name__ == '__main__':
+    classes = ["heritage", "being", "scenery", "other"]
     images_dir = sys.argv[1]
     read = lambda imname: np.asarray(Image.open(imname).convert("RGB"))
     if os.path.isdir(images_dir):
         X_train, img_train = load_data(images_dir)
+        Y = load_label(images_dir, classes, "_")
+        labeled = load_named_label(images_dir)
         p = np.random.permutation(X_train.shape[0])
         X_total = X_train[p]
+        Y_total = Y[p]
+        labeled_total = labeled[p]
+        np.save("custom_named_label", labeled_total)
         img_total = img_train[p]
-        Y = np.zeros((X_total.shape[0],))
-        dec.write_db(X_total, Y, 'custom_total')
-        dec.write_db(img_total, Y, 'custom_img')
+        dec.write_db(X_total, Y_total, 'custom_total')
+        dec.write_db(img_total, Y_total, 'custom_img')
         N = X_total.shape[0] * 4 / 5
-        dec.write_db(X_total[:N], Y[:N], 'custom_train')
-        dec.write_db(X_total[N:], Y[N:], 'custom_test')
+        dec.write_db(X_total[:N], Y_total[:N], 'custom_train')
+        dec.write_db(X_total[N:], Y_total[N:], 'custom_test')
     else:
         raise Exception("Please specific image url")
