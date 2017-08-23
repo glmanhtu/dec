@@ -68,10 +68,7 @@ cpdef hog(im, int sbin = 8):
 
     for x from 1 <= x < visible1 - 1:
         for y from 1 <= y < visible0 - 1:
-            print "width: %d, height: %d, visible0: %d, visible1: %d" % (width, height, visible0, visible1)
-            print "y + 1 : %d, x : %d, y -1 : %d" % (y + 1, x, y-1)
             dy = data[y + 1, x, cc0] - data[y - 1, x, cc0]
-            print "y : %d, x + 1: %d, x - 1: %d" % (y, x + 1, x - 1)
             dx = data[y, x + 1, cc0] - data[y, x - 1, cc0]
             v = dx * dx + dy * dy
 
