@@ -520,7 +520,6 @@ def make_stl_data():
   random.seed(1234)
   X_train, img_train = load_stl('train_X.bin')
   X_test, img_test = load_stl('test_X.bin')
-  X_unlabel, img_unlabel = load_stl('unlabeled_X.bin')
   Y_train = np.fromfile('../stl/train_y.bin', dtype=np.uint8) - 1
   Y_test = np.fromfile('../stl/test_y.bin', dtype=np.uint8) - 1
 
@@ -534,7 +533,7 @@ def make_stl_data():
   write_db(X_total, Y_total, 'stl_total')
   write_db(img_total, Y_total, 'stl_img')
 
-  X = np.concatenate((X_total, X_unlabel), axis=0)
+  X = X_total
   p = np.random.permutation(X.shape[0])
   X = X[p]
   Y = np.zeros((X.shape[0],))
@@ -629,7 +628,7 @@ def write_net(db, dim, n_class, seek):
     make_net(fnet, layers)
 
 
-def classify_dataset(predicts, imgs, db):
+def classify_dataset(predicts, imgs, db, labeled = None):
     classes_dir = "classes_" + db
     if not os.path.isdir(classes_dir):
         os.makedirs(classes_dir)
@@ -637,7 +636,18 @@ def classify_dataset(predicts, imgs, db):
         tmp_dir = os.path.join(classes_dir, str(pred))
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
-        dispSingleImg(imgs, idex, os.path.join(tmp_dir, str(idex) + ".jpg"))
+        if labeled is not None:
+            dispSingleImg(imgs, idex, os.path.join(tmp_dir, labeled[idex] + ".jpg"))
+        else:
+            dispSingleImg(imgs, idex, os.path.join(tmp_dir, str(idex) + ".jpg"))
+
+def create_dataset(actual, imgs, db):
+    classes_dir = "classes_actual_" + db
+    if not os.path.isdir(classes_dir):
+        os.makedirs(classes_dir)
+    for idex, pred in enumerate(actual):
+        dispSingleImg(imgs, idex, os.path.join(classes_dir, str(pred) + "_" + str(idex) + ".jpg"))
+
 
 
 def show_result(predicts, actuals):
@@ -665,6 +675,8 @@ def DisKmeans(db, update_interval = None):
     import cPickle
     from scipy.io import loadmat
 
+    labeled = None
+
     if db == 'mnist':
       N_class = 10
       batch_size = 100
@@ -685,11 +697,12 @@ def DisKmeans(db, update_interval = None):
       Y = np.asarray(np.squeeze(Y), dtype = np.int32)
       N = X.shape[0]
     elif db == 'custom':
-      N_class = 4
+      N_class = 3
       train_batch_size = 256
       img = read_db('custom_img', False)[0]
-      img = img.reshape((img.shape[0], 120, 200, 3))
+      img = img.reshape((img.shape[0], 120, 200, 1))
       X, Y = read_db(db + '_total', True)
+      labeled = np.load("custom_named_label.npy")
       X = np.asarray(X, dtype=np.float64)
       Y = np.asarray(np.squeeze(Y), dtype=np.int32)
       N = X.shape[0]
@@ -754,8 +767,9 @@ def DisKmeans(db, update_interval = None):
       print 'acc: ', acc, 'nmi: ', nmi
       print (Y_pred != Y_pred_last).sum()*1.0/N
       if (Y_pred != Y_pred_last).sum() < 0.001*N:
-        classify_dataset(Y_pred, img, db)
+        classify_dataset(Y_pred, img, db, labeled)
         show_result(Y_pred, Y)
+        create_dataset(Y, img, db)
         print acc_list
         return acc, nmi
       time.sleep(1)

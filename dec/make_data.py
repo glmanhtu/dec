@@ -6,23 +6,9 @@ import cv2
 import cv
 from joblib import Parallel, delayed
 import features
+import random
 import dec
-
-def dispImg(X, n, fname=None):
-  h = X.shape[1]
-  w = X.shape[2]
-  c = X.shape[3]
-  buff = np.zeros((n*h, n*w, c), dtype=np.uint8)
-
-  for i in xrange(n):
-    for j in xrange(n):
-      buff[i*h:(i+1)*h, j*w:(j+1)*w, :] = X[i*n+j]
-
-  if fname is None:
-    cv2.imshow('a', buff)
-    cv2.waitKey(0)
-  else:
-    cv2.imwrite(fname, buff)
+import pdb
 
 def load_data(images_dir):
     ims = [read(os.path.join(images_dir, filename)) for filename in os.listdir(images_dir)]
@@ -47,6 +33,7 @@ def load_data(images_dir):
     return feature, X[:, :, :, [2, 1, 0]]
 
 
+
 def load_label(images_dir, classes, determine):
     return np.array([classes.index(filename.split(determine)[0]) for filename in os.listdir(images_dir)], dtype='uint8')
 
@@ -55,7 +42,7 @@ def load_named_label(images_dir):
     return np.array([filename for filename in os.listdir(images_dir)], dtype='str')
 
 if __name__ == '__main__':
-    classes = ["heritage", "being", "scenery", "other"]
+    classes = ["heritage", "being", "scenery"]
     images_dir = sys.argv[1]
     read = lambda imname: np.asarray(Image.open(imname).convert("RGB"))
     if os.path.isdir(images_dir):
