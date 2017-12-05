@@ -700,7 +700,7 @@ def DisKmeans(db, update_interval = None):
       N_class = 3
       train_batch_size = 256
       img = read_db('custom_img', False)[0]
-      img = img.reshape((img.shape[0], 120, 200, 1))
+      img = img.reshape((img.shape[0], 120, 200, 3))
       X, Y = read_db(db + '_total', True)
       labeled = np.load("custom_named_label.npy")
       X = np.asarray(X, dtype=np.float64)
