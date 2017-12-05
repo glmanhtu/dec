@@ -10,7 +10,7 @@ import random
 import dec
 import pdb
 
-image_size = (120, 200)
+image_size = (200, 120)
 
 def mode():
     if "MODE" in os.environ:
