@@ -10,6 +10,12 @@ import random
 import dec
 import pdb
 
+def mode():
+    if "MODE" in os.environ:
+        return os.environ['MODE']
+    return 'validate'
+
+
 def load_data(images_dir):
     ims = [read(os.path.join(images_dir, filename)) for filename in os.listdir(images_dir)]
     X = np.array(ims, dtype='uint8')
@@ -33,9 +39,14 @@ def load_data(images_dir):
     return feature, X[:, :, :, [2, 1, 0]]
 
 
-
 def load_label(images_dir, classes, determine):
-    return np.array([classes.index(filename.split(determine)[0]) for filename in os.listdir(images_dir)], dtype='uint8')
+    return np.array([get_label(classes, filename, determine) for filename in os.listdir(images_dir)], dtype='uint8')
+
+
+def get_label(classes, filename, determine):
+    if mode() == 'validate':
+        return classes.index(filename.split(determine)[0])
+    return 0
 
 
 def load_named_label(images_dir):
