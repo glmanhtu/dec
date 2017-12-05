@@ -758,7 +758,8 @@ def DisKmeans(db, update_interval = None):
 
 
       Y_pred_last = Y_pred
-      Y_pred = gmm_model.predict(feature).squeeze()
+      Y_pred_all = gmm_model.transform(feature)
+      Y_pred = Y_pred_all.argmax(axis=1).squeeze()
       acc, freq = cluster_acc(Y_pred, Y)
       acc_list.append(acc)
       nmi = normalized_mutual_info_score(Y, Y_pred)
