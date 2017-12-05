@@ -10,6 +10,8 @@ import random
 import dec
 import pdb
 
+image_size = (120, 200)
+
 def mode():
     if "MODE" in os.environ:
         return os.environ['MODE']
@@ -55,7 +57,7 @@ def load_named_label(images_dir):
 if __name__ == '__main__':
     classes = ["heritage", "being", "scenery"]
     images_dir = sys.argv[1]
-    read = lambda imname: np.asarray(Image.open(imname).convert("RGB"))
+    read = lambda imname: np.asarray(Image.open(imname).convert("RGB").resize(image_size, Image.ANTIALIAS))
     if os.path.isdir(images_dir):
         X_train, img_train = load_data(images_dir)
         Y = load_label(images_dir, classes, "_")
