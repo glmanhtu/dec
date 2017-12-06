@@ -18,6 +18,11 @@ from scipy.spatial.distance import cdist
 import cPickle
 import time
 
+def get_gpu():
+    if 'GPU_ID' in os.environ:
+        return os.environ['GPU_ID']
+    return '0'
+
 def vis_square(fname, data, padsize=1, padval=0):
     data -= data.min()
     data /= data.max()
@@ -676,6 +681,8 @@ def DisKmeans(db, update_interval = None):
     from scipy.io import loadmat
 
     labeled = None
+    caffe.set_mode_gpu()
+    caffe.set_device(get_gpu())
 
     if db == 'mnist':
       N_class = 10
@@ -806,7 +813,7 @@ solver_mode: GPU
 debug_info: false
 sample_print: false
 device_id: 0"""%update_interval)
-      os.system('caffe train --solver=solver.prototxt --weights=init.caffemodel')
+      os.system('caffe train --solver=solver.prototxt --weights=init.caffemodel -gpu=' + get_gpu())
       shutil.copyfile('exp/test/save_iter_%d.caffemodel'%update_interval, 'init.caffemodel')
 
       iters += 1

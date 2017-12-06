@@ -9,6 +9,8 @@ import caffe
 import scipy.io
 import dec
 
+caffe.set_mode_gpu()
+caffe.set_device(dec.get_gpu())
 def main(db, params):
     n_layer = params['n_layer'][0]
     drop = params['drop'][0]
@@ -151,7 +153,7 @@ device_id: 0""".format(rate, params['step'][0], params['pt_iter'][0], params['de
 
         net.save('stack_init.caffemodel')
 
-        os.system('caffe train --solver=pt_solver.prototxt --weights=stack_init.caffemodel')
+        os.system('caffe train --solver=pt_solver.prototxt --weights=stack_init.caffemodel -gpu=' + dec.get_gpu())
 
 
         net = caffe.Net('stack_net.prototxt', 'exp/'+db+'/save_iter_%d.caffemodel'%params['pt_iter'][0])
@@ -182,5 +184,5 @@ if __name__ == '__main__':
                'drop': [0.0], 'rate': [0.1], 'step': [20000], 'iter':[100000], 'decay': [0.0000]})
     print pretrain_main(db, {'dim': [input_dim, 500, 500, 2000, 10], 'pt_iter': [50000],
               'drop': [0.2], 'rate': [0.1], 'step': [20000], 'iter':[100000], 'decay': [0.0000]})
-    os.system("caffe train --solver=ft_solver.prototxt --weights=stack_init_final.caffemodel") 
+    os.system("caffe train --solver=ft_solver.prototxt --weights=stack_init_final.caffemodel -gpu=" + dec.get_gpu())
 
