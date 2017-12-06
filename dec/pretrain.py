@@ -9,8 +9,8 @@ import caffe
 import scipy.io
 import dec
 
-caffe.set_mode_gpu()
-caffe.set_device(dec.get_gpu())
+caffe.Net.set_mode_gpu()
+caffe.Net.set_device(dec.get_gpu())
 def main(db, params):
     n_layer = params['n_layer'][0]
     drop = params['drop'][0]

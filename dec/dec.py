@@ -681,8 +681,6 @@ def DisKmeans(db, update_interval = None):
     from scipy.io import loadmat
 
     labeled = None
-    caffe.set_mode_gpu()
-    caffe.set_device(get_gpu())
 
     if db == 'mnist':
       N_class = 10
@@ -750,7 +748,7 @@ def DisKmeans(db, update_interval = None):
       write_net(db, dim, N_class, "'{:08}'".format(0))
       if iters == 0:
         write_db(np.zeros((N,N_class)), np.zeros((N,)), 'train_weight')
-        ret, net = extract_feature('net.prototxt', 'exp/'+db+'/save_iter_100000.caffemodel', ['output'], N, True, 0)
+        ret, net = extract_feature('net.prototxt', 'exp/'+db+'/save_iter_100000.caffemodel', ['output'], N, True, get_gpu())
         feature = ret[0].squeeze()
 
         gmm_model = TMM(N_class)
@@ -758,7 +756,7 @@ def DisKmeans(db, update_interval = None):
         net.params['loss'][0].data[0,0,:,:] = gmm_model.cluster_centers_.T
         net.params['loss'][1].data[0,0,:,:] = 1.0/gmm_model.covars_.T
       else:
-        ret, net = extract_feature('net.prototxt', 'init.caffemodel', ['output'], N, True, 0)
+        ret, net = extract_feature('net.prototxt', 'init.caffemodel', ['output'], N, True, get_gpu())
         feature = ret[0].squeeze()
 
         gmm_model.cluster_centers_ = net.params['loss'][0].data[0,0,:,:].T
