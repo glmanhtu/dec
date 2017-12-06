@@ -20,8 +20,8 @@ import time
 
 def get_gpu():
     if 'GPU_ID' in os.environ:
-        return os.environ['GPU_ID']
-    return '0'
+        return int(os.environ['GPU_ID'])
+    return 0
 
 def vis_square(fname, data, padsize=1, padval=0):
     data -= data.min()
@@ -811,7 +811,7 @@ solver_mode: GPU
 debug_info: false
 sample_print: false
 device_id: 0"""%update_interval)
-      os.system('caffe train --solver=solver.prototxt --weights=init.caffemodel -gpu=' + get_gpu())
+      os.system('caffe train --solver=solver.prototxt --weights=init.caffemodel -gpu=' + str(get_gpu()))
       shutil.copyfile('exp/test/save_iter_%d.caffemodel'%update_interval, 'init.caffemodel')
 
       iters += 1
