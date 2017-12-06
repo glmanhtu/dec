@@ -773,6 +773,9 @@ def DisKmeans(db, update_interval = None):
       print 'acc: ', acc, 'nmi: ', nmi
       print (Y_pred != Y_pred_last).sum()*1.0/N
       if (Y_pred != Y_pred_last).sum() < 0.001*N:
+        for idx, pred in enumerate(Y_pred):
+            if Y_pred_all[idx][pred] < 0.5:
+                Y_pred[idx] = -1
         classify_dataset(Y_pred, img, db, labeled)
         show_result(Y_pred, Y)
         create_dataset(Y, img, db)
